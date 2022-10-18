@@ -9,6 +9,7 @@ namespace AvidaApi.Data
             : base(options)
 
         {
+
         }
 
         public DbSet<AdressModel> Adress { get; set; }

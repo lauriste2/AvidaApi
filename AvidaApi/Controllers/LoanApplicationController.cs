@@ -22,7 +22,7 @@ namespace AvidaApi.Controllers
         }
 
         [HttpGet("id")]
-        [ProducesResponseType(typeof(LoanApplicationModel),StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(int id)
         {
@@ -36,7 +36,7 @@ namespace AvidaApi.Controllers
         {
             await _context.LoanApplication.AddAsync(loanApplication);
             await _context.SaveChangesAsync();
-           return CreatedAtAction(nameof(GetById),new {id = loanApplication.Id}, loanApplication);   
+            return CreatedAtAction(nameof(GetById), new { id = loanApplication.Id }, loanApplication);
         }
 
         [HttpPut("{id}")]
@@ -50,10 +50,8 @@ namespace AvidaApi.Controllers
                 return BadRequest();
             }
 
-             _context.Entry(loanApplication).State = EntityState.Modified;
 
-
-           // _context.SaveChanges(); // Works
+            _context.Entry(loanApplication).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return NoContent();
