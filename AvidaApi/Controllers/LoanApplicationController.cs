@@ -12,11 +12,13 @@ namespace AvidaApi.Controllers
     {
         private readonly LoanDBContext _context;
         private readonly ILoanService _loanService;
+        private readonly IIndatavalidation _indatavalidation;
 
-        public LoanApplicationController(LoanDBContext Context, ILoanService loanService)
+        public LoanApplicationController(LoanDBContext Context, ILoanService loanService, IIndatavalidation indatavalidation)
         {
             _context = Context;
             _loanService = loanService;
+            _indatavalidation = indatavalidation;
         }
         [HttpGet]
         public async Task<IEnumerable<LoanApplicationModel>> Get()
@@ -38,13 +40,10 @@ namespace AvidaApi.Controllers
         [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create(LoanApplicationModel loanApplication)
         {
-            if(loanApplication.Person.FirstName == "string" || loanApplication.Person.LastName == "string" || loanApplication.Decision == true)
+            if (!_indatavalidation.ValidatePerson(loanApplication.Person))
+            //if (loanApplication.Person.FirstName == "string" || loanApplication.Person.LastName == "string" || loanApplication.Decision == true)
             {
                 return BadRequest("Inmatning felaktig");
-
-              
-
-                //throw new Exception("Inmatning felaktig");
             }
 
             _loanService.MakeDecision(loanApplication);

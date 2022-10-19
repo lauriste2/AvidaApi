@@ -7,6 +7,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddScoped<ILoanService,LoanService>();
+builder.Services.AddScoped<IIndatavalidation, Indatavalidation>();
 
 // Add services to the container.
 
