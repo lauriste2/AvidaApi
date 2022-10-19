@@ -1,5 +1,6 @@
 ﻿using AvidaApi.Data;
 using AvidaApi.Models;
+using AvidaApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +11,12 @@ namespace AvidaApi.Controllers
     public class LoanApplicationController : ControllerBase
     {
         private readonly LoanDBContext _context;
+        private readonly ILoanService _loanService;
 
-        public LoanApplicationController(LoanDBContext Context)
+        public LoanApplicationController(LoanDBContext Context, ILoanService loanService)
         {
             _context = Context;
+            _loanService = loanService;
         }
         [HttpGet]
         public async Task<IEnumerable<LoanApplicationModel>> Get()
@@ -32,30 +35,24 @@ namespace AvidaApi.Controllers
 
         [HttpPost]
         [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create(LoanApplicationModel loanApplication)
         {
+            if(loanApplication.Person.FirstName == "string" || loanApplication.Person.LastName == "string" || loanApplication.Decision == true)
+            {
+                return BadRequest("Inmatning felaktig");
+
+              
+
+                //throw new Exception("Inmatning felaktig");
+            }
+
+            _loanService.MakeDecision(loanApplication);
             await _context.LoanApplication.AddAsync(loanApplication);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetById), new { id = loanApplication.Id }, loanApplication);
         }
 
-        [HttpPut("{id}")]
-        [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Update(int id, LoanApplicationModel loanApplication)
-        {
-
-            if (id != loanApplication.Id)
-            {
-                return BadRequest();
-            }
-
-
-            _context.Entry(loanApplication).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status404NotFound)]
@@ -71,6 +68,36 @@ namespace AvidaApi.Controllers
             return NoContent();
         }
 
+        [HttpPut("{id}")]
+        [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> MakeDecision(int id)
+        {
+            var loanApplication = await _context.LoanApplication.FindAsync(id);
+
+            if (loanApplication == null)
+            {
+                return NotFound();
+            }
+
+            _loanService.MakeDecision(loanApplication);
+
+            _context.Entry(loanApplication).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        //private void MakeDecision(LoanApplicationModel loanApplication)
+        //{
+        //    var person = loanApplication.Person;
+        //    var loan = loanApplication.Loan;
+
+        //    if (person.MonthlyIncome > 31000 && loan.LoanAmount > 0)
+        //        loanApplication.Decision = true;
+        //    else
+        //        loanApplication.Decision = false;
+        //}
     }
 }
 

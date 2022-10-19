@@ -10,7 +10,7 @@ namespace AvidaApi.Models
         [Required]
         public string CurrencyCode { get; set; } = "SEK";
         [Required]
-        public DateTime LoanDuration { get; set; }
+        public DateTime? LoanDuration { get; set; }
 
     }
 }

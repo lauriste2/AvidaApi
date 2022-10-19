@@ -11,7 +11,7 @@ namespace AvidaApi.Models
         [Required]
         public LoanModel Loan { get; set; } = new LoanModel();
         [Required]
-        public bool Decision { get; set; } = false;
+        public bool? Decision { get; set; } 
 
 
     }
