@@ -1,9 +1,15 @@
-﻿using AvidaApi.Models;
+﻿using System.Text;
+using AvidaApi.Models;
 
 namespace AvidaApi.Services
 {
     public interface IIndatavalidation
     {
-        bool ValidatePerson(PersonModel person);
+
+        string ValidateLoanApplication(LoanApplicationModel Validate);
+        //string ValidatePerson(PersonModel person);
+        //string ValidateAdress(AdressModel adress);
+
+        //string ValidateLoan(LoanModel loan);
     }
 }

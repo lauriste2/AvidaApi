@@ -40,10 +40,14 @@ namespace AvidaApi.Controllers
         [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create(LoanApplicationModel loanApplication)
         {
-            if (!_indatavalidation.ValidatePerson(loanApplication.Person))
-            //if (loanApplication.Person.FirstName == "string" || loanApplication.Person.LastName == "string" || loanApplication.Decision == true)
+            string errorMessage = string.Empty;
+
+            errorMessage = _indatavalidation.ValidateLoanApplication(loanApplication);
+
+          
+            if (errorMessage.Length > 0)
             {
-                return BadRequest("Inmatning felaktig");
+                return BadRequest(errorMessage);
             }
 
             _loanService.MakeDecision(loanApplication);
