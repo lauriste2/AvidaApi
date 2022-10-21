@@ -11,14 +11,16 @@ namespace AvidaApi.Controllers
     public class LoanApplicationController : ControllerBase
     {
         private readonly LoanDBContext _context;
-        private readonly ILoanService _loanService;
+        private readonly IDecisionRulesService _loanService;
         private readonly IIndatavalidation _indatavalidation;
+        private readonly ILogger<LoanApplicationController> _logger;
 
-        public LoanApplicationController(LoanDBContext Context, ILoanService loanService, IIndatavalidation indatavalidation)
+        public LoanApplicationController(LoanDBContext Context, IDecisionRulesService loanService, IIndatavalidation indatavalidation, ILogger<LoanApplicationController> logger)
         {
             _context = Context;
             _loanService = loanService;
             _indatavalidation = indatavalidation;
+            _logger = logger;
         }
         [HttpGet]
         public async Task<IEnumerable<LoanApplicationModel>> Get()
@@ -31,9 +33,12 @@ namespace AvidaApi.Controllers
         [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(int id)
         {
-            var loanApplication = await _context.LoanApplication.FindAsync(id);
+            LoanApplicationModel? loanApplication = await PupulateLoanApplicationModel(id);
+
             return loanApplication == null ? NotFound() : Ok(loanApplication);
         }
+
+       
 
         [HttpPost]
         [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status201Created)]
@@ -44,9 +49,11 @@ namespace AvidaApi.Controllers
 
             errorMessage = _indatavalidation.ValidateLoanApplication(loanApplication);
 
-          
+
             if (errorMessage.Length > 0)
             {
+                _logger.LogError("Logging BadRequest", errorMessage);
+
                 return BadRequest(errorMessage);
             }
 
@@ -73,17 +80,15 @@ namespace AvidaApi.Controllers
 
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> MakeDecision(int id)
+        [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Update(int id, LoanApplicationModel loanApplication)
         {
-            var loanApplication = await _context.LoanApplication.FindAsync(id);
 
-            if (loanApplication == null)
+            if (id != loanApplication.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            _loanService.MakeDecision(loanApplication);
 
             _context.Entry(loanApplication).State = EntityState.Modified;
             await _context.SaveChangesAsync();
@@ -91,16 +96,35 @@ namespace AvidaApi.Controllers
             return NoContent();
         }
 
-        //private void MakeDecision(LoanApplicationModel loanApplication)
-        //{
-        //    var person = loanApplication.Person;
-        //    var loan = loanApplication.Loan;
+        private async Task<LoanApplicationModel> PupulateLoanApplicationModel(int id)
+        {
+            LoanApplicationModel? loanApplication = await _context.LoanApplication.FindAsync(id);
 
-        //    if (person.MonthlyIncome > 31000 && loan.LoanAmount > 0)
-        //        loanApplication.Decision = true;
-        //    else
-        //        loanApplication.Decision = false;
-        //}
+            if (loanApplication != null)
+            {
+                PersonModel? person = await _context.Person.FindAsync(loanApplication.PersonId);
+
+                if (person != null)
+                {
+
+                    var adress = await _context.Adress.FindAsync(person.AdressID);
+                    loanApplication.Person = person;
+
+                    if (adress != null)
+
+                        loanApplication.Person.Adress = adress;
+                }
+
+                LoanModel? loan = await _context.LoanModel.FindAsync(loanApplication.LoanID);
+
+                if (loan != null)
+                {
+                    loanApplication.Loan = loan;
+                }
+            }
+
+            return loanApplication;
+        }
     }
 }
 

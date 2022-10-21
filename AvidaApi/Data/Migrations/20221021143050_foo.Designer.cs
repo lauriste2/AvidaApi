@@ -4,6 +4,7 @@ using AvidaApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AvidaApi.Data.Migrations
 {
     [DbContext(typeof(LoanDBContext))]
-    partial class LoanDBContextModelSnapshot : ModelSnapshot
+    [Migration("20221021143050_foo")]
+    partial class foo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,7 +116,7 @@ namespace AvidaApi.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("AdressID")
+                    b.Property<int>("AdressId")
                         .HasColumnType("int");
 
                     b.Property<string>("FirstName")
@@ -135,7 +137,7 @@ namespace AvidaApi.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AdressID");
+                    b.HasIndex("AdressId");
 
                     b.ToTable("Person");
                 });
@@ -163,7 +165,7 @@ namespace AvidaApi.Data.Migrations
                 {
                     b.HasOne("AvidaApi.Models.AdressModel", "Adress")
                         .WithMany()
-                        .HasForeignKey("AdressID")
+                        .HasForeignKey("AdressId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

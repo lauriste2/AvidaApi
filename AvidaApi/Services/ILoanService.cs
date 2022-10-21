@@ -2,7 +2,7 @@
 
 namespace AvidaApi.Services
 {
-    public interface ILoanService
+    public interface IDecisionRulesService
     {
         void MakeDecision(LoanApplicationModel loanApplication);
     }
