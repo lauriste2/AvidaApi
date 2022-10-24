@@ -19,8 +19,9 @@ namespace AvidaApi.Controllers
         private readonly IDecisionRulesService _decisionRulesService;
         private readonly ILogger<LoanApplicationController> _logger;
 
-        public LoanApplicationController(LoanDBContext Context, IDecisionRulesService decisionRulesService, IIndatavalidation indatavalidation, 
-            IPersonService personService, IAddressService addressService, 
+
+        public LoanApplicationController(LoanDBContext Context, IDecisionRulesService decisionRulesService, IIndatavalidation indatavalidation,
+            IPersonService personService, IAddressService addressService,
             IRepositoryLoanApplication repositoryLoanApplication, ILoanService loanService, ILogger<LoanApplicationController> logger)
         {
             _context = Context;
@@ -60,7 +61,6 @@ namespace AvidaApi.Controllers
 
             _decisionRulesService.MakeDecision(loanApplication);
 
-
             if (loanApplication.Decision == true)
             {
                 loanApplication.Loan.LoanDuration = DateTime.Now.AddYears(10);
@@ -70,17 +70,18 @@ namespace AvidaApi.Controllers
                 loanApplication.Loan.LoanDuration = DateTime.MinValue;
             }
 
-            
             await _context.LoanApplication.AddAsync(loanApplication);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetById), new { id = loanApplication.Id }, loanApplication);
         }
 
-        [HttpPut("{id:int}")]
-        public async Task<ActionResult<LoanApplicationModel>> UpdateloanApplication(int id, LoanApplicationModel loanApplication)
+       
+
+        [HttpPut("{loanApplicationID:int}")]
+        public async Task<ActionResult<LoanApplicationModel>> UpdateloanApplication(int loanApplicationID, LoanApplicationModel loanApplication)
         {
             var person = loanApplication.Person;
-            if (id != loanApplication.Id)
+            if (loanApplicationID != loanApplication.Id)
             {
                 return BadRequest();
             }
@@ -105,7 +106,6 @@ namespace AvidaApi.Controllers
                 await _loanService.UpdateAsync(loan, loanApplication.Decision);
 
                 return loanApplication == null ? NotFound() : Ok(loanApplication);
-
             }
 
             catch (Exception)
@@ -128,35 +128,6 @@ namespace AvidaApi.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private async Task<LoanApplicationModel> PupulateLoanApplicationModel2(int id)
-        {
-            LoanApplicationModel? loanApplication = await _context.LoanApplication.FindAsync(id);
-            if (loanApplication != null)
-            {
-                PersonModel? person = await _context.Person.FindAsync(loanApplication.PersonId);
-
-                if (person != null)
-                {
-                    var adress = await _context.Adress.FindAsync(person.AdressID);
-                    loanApplication.Person = person;
-
-                    if (adress != null)
-                    {
-                        loanApplication.Person.Adress = adress;
-                    }
-                }
-
-                LoanModel? loan = await _context.LoanModel.FindAsync(loanApplication.LoanID);
-
-                if (loan != null)
-                {
-                    loanApplication.Loan = loan;
-                }
-            }
-
-            return loanApplication;
         }
     }
 }
