@@ -7,9 +7,9 @@ namespace AvidaApi.Services
     {
 
         string ValidateLoanApplication(LoanApplicationModel Validate);
-        //string ValidatePerson(PersonModel person);
-        //string ValidateAdress(AdressModel adress);
+        string ValidatePerson(PersonModel person);
+        string ValidateAdress(AdressModel adress);
 
-        //string ValidateLoan(LoanModel loan);
+        string ValidateLoan(LoanModel loan, bool? decision);
     }
 }

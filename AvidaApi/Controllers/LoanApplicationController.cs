@@ -11,15 +11,23 @@ namespace AvidaApi.Controllers
     public class LoanApplicationController : ControllerBase
     {
         private readonly LoanDBContext _context;
-        private readonly IDecisionRulesService _loanService;
+        private readonly ILoanService _loanService;
         private readonly IIndatavalidation _indatavalidation;
+        private readonly IPersonService _personService;
+        private readonly IAddressService _addressService;
+        private readonly IRepositoryLoanApplication _repositoryLoanApplication;
+        private readonly IDecisionRulesService _decisionRulesService;
         private readonly ILogger<LoanApplicationController> _logger;
 
-        public LoanApplicationController(LoanDBContext Context, IDecisionRulesService loanService, IIndatavalidation indatavalidation, ILogger<LoanApplicationController> logger)
+        public LoanApplicationController(LoanDBContext Context, IDecisionRulesService decisionRulesService, IIndatavalidation indatavalidation, IPersonService personService, IAddressService addressService, IRepositoryLoanApplication repositoryLoanApplication, ILoanService loanService, ILogger<LoanApplicationController> logger)
         {
             _context = Context;
             _loanService = loanService;
             _indatavalidation = indatavalidation;
+            _personService = personService;
+            _addressService = addressService;
+            _repositoryLoanApplication = repositoryLoanApplication;
+            _decisionRulesService = decisionRulesService;
             _logger = logger;
         }
         [HttpGet]
@@ -38,7 +46,7 @@ namespace AvidaApi.Controllers
             return loanApplication == null ? NotFound() : Ok(loanApplication);
         }
 
-       
+
 
         [HttpPost]
         [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status201Created)]
@@ -57,10 +65,51 @@ namespace AvidaApi.Controllers
                 return BadRequest(errorMessage);
             }
 
-            _loanService.MakeDecision(loanApplication);
+            _decisionRulesService.MakeDecision(loanApplication);
             await _context.LoanApplication.AddAsync(loanApplication);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetById), new { id = loanApplication.Id }, loanApplication);
+        }
+
+        [HttpPut("{loanApplicationID:int}")]
+        public async Task<ActionResult<LoanApplicationModel>> UpdateloanApplication(int loanApplicationID, LoanApplicationModel loanApplication)
+        {
+            var person = loanApplication.Person;
+            if (loanApplicationID != loanApplication.Id)
+            {
+                return BadRequest();
+            }
+
+            if (person == null)
+            {
+                return BadRequest();
+            }
+
+            try
+            {
+                await _personService.UpdateAsync(person);
+
+                if (person.Adress != null)
+                {
+                    await _addressService.UpdateAsync(person.Adress);
+                }
+
+                loanApplication.Person = person;
+                await _repositoryLoanApplication.Update(loanApplication);
+                var loan = loanApplication.Loan;
+                await _loanService.UpdateAsync(loan, loanApplication.Decision);
+
+                return loanApplication == null ? NotFound() : Ok(loanApplication);
+
+                return NoContent();
+
+            }
+
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                "Error updating data");
+            }
         }
 
         [HttpDelete("{id}")]
@@ -73,24 +122,6 @@ namespace AvidaApi.Controllers
             if (loanApplicationToDelete == null) return NotFound();
 
             _context.LoanApplication.Remove(loanApplicationToDelete);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        [HttpPut("{id}")]
-        [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(LoanApplicationModel), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Update(int id, LoanApplicationModel loanApplication)
-        {
-
-            if (id != loanApplication.Id)
-            {
-                return BadRequest();
-            }
-
-
-            _context.Entry(loanApplication).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return NoContent();
