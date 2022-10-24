@@ -69,8 +69,6 @@ namespace AvidaApi.Services
                 _Context.LoanApplication.Update(LoanApplicationModelToupdate);
                 _Context.SaveChanges();
             }
-
-
         }
 
         public async Task<LoanApplicationModel> PupulateLoanApplicationModel(int id)

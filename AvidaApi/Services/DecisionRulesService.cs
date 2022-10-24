@@ -17,6 +17,7 @@ namespace AvidaApi.Services
             else
             {
                 loanApplication.Decision = false;
+
             }
 
         }

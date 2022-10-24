@@ -8,7 +8,7 @@ namespace AvidaApi.Services
         private LoanDBContext _Context;
         private readonly IIndatavalidation _indatavalidation;
         private readonly ILogger<PersonService> _logger;
-        public PersonService(LoanDBContext Context, IIndatavalidation indatavalidation ,ILogger<PersonService> logger)
+        public PersonService(LoanDBContext Context, IIndatavalidation indatavalidation, ILogger<PersonService> logger)
         {
             _Context = Context;
             _indatavalidation = indatavalidation;
@@ -20,8 +20,14 @@ namespace AvidaApi.Services
 
             string errrorMessage = _indatavalidation.ValidatePerson(person);
 
-            if (personToUpdate != null && errrorMessage.Length == 0)
+            if (errrorMessage.Length > 0)
             {
+                _logger.LogError("Nått ogiltigt person med id" + person.Id + " när den skulle sparas " + errrorMessage);
+            }
+
+            else if (personToUpdate != null && errrorMessage.Length == 0)
+            {
+
                 bool uppdaterad = false;
 
                 if (personToUpdate.PersonalNumber != person.PersonalNumber)
@@ -50,23 +56,27 @@ namespace AvidaApi.Services
 
                 try
                 {
-                    if(uppdaterad)
+                    if (uppdaterad)
                     {
                         await _Context.SaveChangesAsync();
 
-                        _logger.LogInformation("Person med "+ person.Id +"är uppdaterad");
+                        _logger.LogInformation("Person med " + person.Id + "är uppdaterad");
                     }
-                    
+
+
+
+                    personToUpdate.PersonalNumber = person.PersonalNumber;
+                    personToUpdate.FirstName = person.FirstName;
+                    personToUpdate.MonthlyIncome = person.MonthlyIncome;
+                    personToUpdate.LastName = person.LastName;
+
+
+                    await _Context.SaveChangesAsync();
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Nått gick fel när en person med id" + person.Id + " Skulle sparas ");
                 }
-            }
-
-            else if(errrorMessage.Length > 0)
-            {
-                _logger.LogError("Nått ogiltigt person med id" + person.Id + " när den skulle sparas "+ errrorMessage);
             }
         }
     }

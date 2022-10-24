@@ -8,7 +8,7 @@ namespace AvidaApi.Services
         void Delete(LoanApplicationModel loanApplication);
         Task<LoanApplicationModel> GetById(int Id);
         Task Update(LoanApplicationModel loanApplicationModel);
-
         Task<LoanApplicationModel> PupulateLoanApplicationModel(int id);
+
     }
 }
