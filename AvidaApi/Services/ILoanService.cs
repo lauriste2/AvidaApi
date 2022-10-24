@@ -2,8 +2,8 @@
 
 namespace AvidaApi.Services
 {
-    public interface IDecisionRulesService
+    public interface ILoanService
     {
-        void MakeDecision(LoanApplicationModel loanApplication);
+        Task UpdateAsync(LoanModel loan, bool? decision);
     }
 }

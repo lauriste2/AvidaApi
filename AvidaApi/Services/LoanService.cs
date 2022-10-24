@@ -1,26 +1,68 @@
-﻿using AvidaApi.Models;
+﻿using AvidaApi.Data;
+using AvidaApi.Models;
 
 namespace AvidaApi.Services
 {
-    public class DecisionRulesService : IDecisionRulesService
+    public class LoanService : ILoanService
     {
+        private LoanDBContext _Context;
+        private IDecisionRulesService _decisionRulesService;
+        private IIndatavalidation _indatavalidation;
+        private readonly ILogger<LoanService> _logger;
 
-        public void MakeDecision(LoanApplicationModel loanApplication)
+        public LoanService(LoanDBContext Context, IIndatavalidation indatavalidation, IDecisionRulesService decisionRulesService, ILogger<LoanService> logger)
         {
-            var person = loanApplication.Person;
-            var loan = loanApplication.Loan;
+            _logger = logger;
+            _Context = Context;
+            _decisionRulesService = decisionRulesService;
+            _indatavalidation = indatavalidation;
+        }
 
-            if (person.MonthlyIncome > 31000 && loan.LoanAmount > 0)
+        public async Task UpdateAsync(LoanModel loan,bool? decision)
+        {
+            string errrorMessage = _indatavalidation.ValidateLoan(loan, decision);
+
+            LoanModel? loanToupdate = await _Context.LoanModel.FindAsync(loan.Id);
+
+            if (loanToupdate != null && loan != null && errrorMessage.Length == 0)
             {
-                loanApplication.Decision = true;
-                loanApplication.Loan.LoanDuration = DateTime.Now.AddYears(10);
+                bool uppdaterad = false;
+
+                if (loanToupdate.LoanAmount != loan.LoanAmount)
+                {
+                    uppdaterad = true;
+                    loanToupdate.LoanAmount = loan.LoanAmount;
+                }
+
+                if (loanToupdate.CurrencyCode != loan.CurrencyCode)
+                {
+                    uppdaterad = true;
+                    loanToupdate.CurrencyCode = loan.CurrencyCode;
+                }
+
+                if((bool)!decision || decision == null)
+                {
+                    loanToupdate.LoanDuration = DateTime.MinValue;
+                }
+
+                else if((bool)decision)
+                {
+                    loanToupdate.LoanDuration = DateTime.Now.AddYears(10);
+                }
+
+                if (loanToupdate.LoanDuration != loan.LoanDuration)
+                {
+                    uppdaterad = true;
+                }
+
+                    if (uppdaterad)
+                {
+                    await _Context.SaveChangesAsync();
+                    _logger.LogInformation("Lån med med id är uppdaterad" + loan.Id);
+                }
+                else
+                    _logger.LogInformation("Inget ändrat för Lån " + loan.Id);
             }
-            else
-            {
-                loanApplication.Decision = false;
-                loanApplication.Loan.LoanDuration = DateTime.MinValue;
-            }
-                
         }
     }
 }

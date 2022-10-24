@@ -7,7 +7,7 @@ namespace AvidaApi.Services
     {
         StringBuilder errorMessageBuilder = new StringBuilder();
 
-        private string ValidatePerson(PersonModel person)
+        public string ValidatePerson(PersonModel person)
         {
             string returnmessage = string.Empty;
 
@@ -31,7 +31,7 @@ namespace AvidaApi.Services
             return returnmessage;
         }
 
-        private string ValidateAdress(AdressModel adress)
+        public string ValidateAdress(AdressModel adress)
         {
             string returnmessage = string.Empty;
 
@@ -56,7 +56,7 @@ namespace AvidaApi.Services
             return returnmessage;
         }
 
-        private void ValidateDouble(double amount, string errorMessage)
+        public void ValidateDouble(double amount, string errorMessage)
         {
             if (amount == 0)
             {
@@ -65,7 +65,7 @@ namespace AvidaApi.Services
             }
         }
 
-        private void ValidateDate(DateTime? date, string errorMessage)
+        public void ValidateDate(DateTime? date, string errorMessage)
         {
             
             if (date == null || date == DateTime.MinValue /*|| date < DateTime.Now.AddYears(10)*/)
@@ -76,7 +76,7 @@ namespace AvidaApi.Services
 
         }
 
-        private void ValidateString(string str,string errorMessage)
+        public void ValidateString(string str,string errorMessage)
         {
             if(string.IsNullOrEmpty(str))
             {
@@ -94,7 +94,7 @@ namespace AvidaApi.Services
               
         }
 
-        private string ValidateLoan(LoanModel loan)
+        public string ValidateLoan(LoanModel loan,bool? decision)
         {
             string returnmessage = string.Empty;
 
@@ -107,6 +107,7 @@ namespace AvidaApi.Services
 
             ValidateString(loan.CurrencyCode, "Valuta är ej giltigt");
             ValidateDouble(loan.LoanAmount, "Lånesumman  är ej giltigt");
+            if (decision ==  true)
             ValidateDate(loan.LoanDuration, "Slutdatum är ej giltigt");
 
 
@@ -123,7 +124,7 @@ namespace AvidaApi.Services
             string returnmessage = string.Empty;
             ValidatePerson(loanApplication.Person);
 
-            ValidateLoan(loanApplication.Loan);
+            ValidateLoan(loanApplication.Loan, loanApplication.Decision);
 
 
             ValidateAdress(loanApplication.Person.Adress);

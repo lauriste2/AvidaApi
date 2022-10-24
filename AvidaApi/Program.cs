@@ -13,6 +13,13 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IDecisionRulesService, DecisionRulesService>();
 builder.Services.AddScoped<IIndatavalidation, Indatavalidation>();
+builder.Services.AddScoped<IRepositoryLoanApplication, RepositoryLoanApplication>();
+builder.Services.AddScoped<IPersonService, PersonService>();
+builder.Services.AddScoped<IAddressService, AddressService>();
+builder.Services.AddScoped<ILoanService, LoanService>();
+
+
+
 
 // Add services to the container.
 
