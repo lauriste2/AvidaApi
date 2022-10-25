@@ -63,13 +63,12 @@ namespace AvidaApi.Controllers
 
             if (loanApplication.Decision == true)
             {
-                loanApplication.Loan.LoanDuration = DateTime.Now.AddYears(10);
+                loanApplication.Loan.LoanDuration = _loanService.GetLoanDecisionApprovedValue;
             }
             else
             {
-                loanApplication.Loan.LoanDuration = DateTime.MinValue;
+                loanApplication.Loan.LoanDuration = _loanService.GetLoanDecisionDeniedValue;
             }
-
             await _context.LoanApplication.AddAsync(loanApplication);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetById), new { id = loanApplication.Id }, loanApplication);

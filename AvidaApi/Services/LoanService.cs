@@ -6,16 +6,30 @@ namespace AvidaApi.Services
     public class LoanService : ILoanService
     {
         private LoanDBContext _Context;
-        private IDecisionRulesService _decisionRulesService;
         private IIndatavalidation _indatavalidation;
         private readonly ILogger<LoanService> _logger;
 
-        public LoanService(LoanDBContext Context, IIndatavalidation indatavalidation, IDecisionRulesService decisionRulesService, ILogger<LoanService> logger)
+        public LoanService(LoanDBContext Context, IIndatavalidation indatavalidation, ILogger<LoanService> logger)
         {
             _logger = logger;
             _Context = Context;
-            _decisionRulesService = decisionRulesService;
             _indatavalidation = indatavalidation;
+        }
+
+        public DateTime GetLoanDecisionApprovedValue
+        {
+            get
+            {
+               return DateTime.Now.AddYears(10);
+            }
+        }
+
+        public DateTime GetLoanDecisionDeniedValue
+        {
+            get
+            {
+                return DateTime.MinValue;
+            }
         }
 
         public async Task UpdateAsync(LoanModel loan,bool? decision)
@@ -42,12 +56,12 @@ namespace AvidaApi.Services
 
                 if((bool)!decision || decision == null)
                 {
-                    loanToupdate.LoanDuration = DateTime.MinValue;
+                    loanToupdate.LoanDuration = GetLoanDecisionDeniedValue;
                 }
 
                 else if((bool)decision)
                 {
-                    loanToupdate.LoanDuration = DateTime.Now.AddYears(10);
+                    loanToupdate.LoanDuration = GetLoanDecisionApprovedValue;
                 }
 
                 if (loanToupdate.LoanDuration != loan.LoanDuration)

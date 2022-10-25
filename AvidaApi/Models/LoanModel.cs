@@ -6,9 +6,6 @@ namespace AvidaApi.Models
     public class LoanModel
     {
 
-       
-
-
         [ForeignKey("LoanApplicationModel")]
         [Required]
         public int Id { get; set; } 
@@ -17,7 +14,7 @@ namespace AvidaApi.Models
         [Required]
         public string CurrencyCode { get; set; } = "SEK";
         [Required]
-        public DateTime? LoanDuration { get; set; }
+        public DateTime LoanDuration { get; set; }
 
     }
 

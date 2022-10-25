@@ -94,6 +94,8 @@ namespace AvidaApi.Services
 
                 if (loan != null)
                 {
+                   
+
                     loanApplication.Loan = loan;
                 }
             }
