@@ -61,7 +61,7 @@ namespace AvidaApi.Services
                     if (uppdaterad)
                     {
                         await _Context.SaveChangesAsync();
-                        _logger.LogInformation("adress med id är uppdaterad" + adress.Id);
+                        _logger.LogInformation("Adress med id är uppdaterad " + adress.Id);
                     }
                     else
                     {
@@ -71,7 +71,7 @@ namespace AvidaApi.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Nått gick fel när en Adress med id" + adress.Id + " Skulle sparas ");
+                    _logger.LogError(ex, "Nått gick fel när en Adress med id " + adress.Id + " Skulle sparas ");
                 }
             }
 

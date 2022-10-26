@@ -2,14 +2,19 @@ using AvidaApi.Data;
 using AvidaApi.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Serilog.Events;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-//IConfiguration configuration = new ConfigurationBuilder()
-//    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true).Build();
+// OBS Not Working
+var logger = new LoggerConfiguration()
+        .ReadFrom.Configuration(builder.Configuration)
+        .Enrich.FromLogContext()
+        .CreateLogger();
 
-//Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(configuration).CreateLogger();
 
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
 
 builder.Services.AddScoped<IDecisionRulesService, DecisionRulesService>();
 builder.Services.AddScoped<IIndatavalidation, Indatavalidation>();
@@ -18,10 +23,14 @@ builder.Services.AddScoped<IPersonService, PersonService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<ILoanService, LoanService>();
 
+Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .CreateLogger();
 
 
-
-// Add services to the container.
+Log.Information("Starting web host");
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -46,5 +55,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
 
 

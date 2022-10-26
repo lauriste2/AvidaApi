@@ -14,4 +14,12 @@
     <PackageReference Include="coverlet.collector" Version="3.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AvidaApi\AvidaApi.csproj" />
+  </ItemGroup>
+
 </Project>
