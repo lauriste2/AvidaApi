@@ -8,7 +8,7 @@ using NUnit.Framework;
 using System;
 using System.Threading.Tasks;
 
-namespace AvidaApiTest
+namespace AvidaApiTest.Services
 {
     public class AddressServiceTest
     {
