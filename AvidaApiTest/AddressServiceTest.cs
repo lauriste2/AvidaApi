@@ -1,5 +1,4 @@
 using AvidaApi.Data;
-using AvidaApi.Data.Migrations;
 using AvidaApi.Models;
 using AvidaApi.Services;
 using Microsoft.EntityFrameworkCore;
@@ -7,32 +6,29 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
 namespace AvidaApiTest
 {
-    public class Tests
+    public class AddressServiceTest
     {
+        private const string DatabaseName = "Avida";
+        private DbContextOptions<LoanDBContext> _options;
+
         [SetUp]
         public void Setup()
         {
+            _options = new DbContextOptionsBuilder<LoanDBContext>()
+           .UseInMemoryDatabase(databaseName: DatabaseName)
+           .Options;
         }
 
         [Test]
-        public async Task Test1Async()
+        public async Task UpdateAsync_Log_Information_When_Adress_Is_Diifrent_inDatabase_and_inparameter()
         {
-            // arrange 
+            // Arrange 
 
-
-
-            var options = new DbContextOptionsBuilder<LoanDBContext>()
-            .UseInMemoryDatabase(databaseName: "Avida")
-            .Options;
-
-            AdressModel adressModel = new AdressModel()
+            AdressModel adressModel = new()
             {
                 Id = 1,
                 Address = "Damastväen 7 2 trp",
@@ -42,23 +38,25 @@ namespace AvidaApiTest
                 PostalCode = "168 74"
             };
 
-            Indatavalidation indatavalidation = new Indatavalidation();
+            var indatavalidation = new Indatavalidation();
             var iLoggerMock = new Mock<ILogger<PersonService>>();
 
-
-            var context = new LoanDBContext(options);
+            var context = new LoanDBContext(_options);
 
             context.Adress.Add(new AdressModel { Id = 1, Address = "Damastväen 7 ", City = "Bromma", PostalCode = "168 74", Country = "Sverige", PhoneNumber = "070-3673815" });
             context.SaveChanges();
+            var addressService = new AddressService(context, indatavalidation, iLoggerMock.Object);
 
-            AddressService addressService = new(context, indatavalidation, iLoggerMock.Object);
+
+            // Act
             await addressService.UpdateAsync(adressModel);
 
-            Assert.AreEqual(1, 1);
+            //Assert
 
-            //context.Setup(c => c.SaveChangesAsync()).Verifiable();.
-           
-           
+
+            // TODO 
+            // Assert _Context.SaveChangesAsync()
+            // Se https://github.com/romantitov/MockQueryable  for help 
 
             iLoggerMock.Verify(logger => logger.Log(
         It.Is<LogLevel>(logLevel => logLevel == LogLevel.Information),
